@@ -23,6 +23,7 @@ public final class ServerMain {
         StaticFileHandler staticHandler = new StaticFileHandler(ServerConfig.WEB_ROOT); // www 디렉토리가 루트가 됨
         SimplePostHandler postHandler = new SimplePostHandler(); // POST 요청을 단순히 에코해주는 핸들러
         Router router = new Router(staticHandler, postHandler);
+        // 예시: router.registerPost("/login", new LoginHandler()); 형태로 경로별 POST 핸들러 추가 가능
         // NetAcceptor가 실질적으로 소켓 수락과 워커 스케줄링을 담당한다.
         NetAcceptor acceptor = new NetAcceptor(router);
         // JVM 종료 시점에도 서버가 깔끔히 내려가도록 훅을 등록한다.
