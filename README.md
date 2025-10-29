@@ -36,6 +36,11 @@ PlantUML 소스는 `docs/` 디렉터리에 있습니다.
 
 * `docs/class-diagram.puml` – 주요 클래스 관계를 나타내는 클래스 다이어그램
 * `docs/sequence-diagram.puml` – 클라이언트 요청이 처리되는 순서를 나타내는 시퀀스 다이어그램
+* 렌더링한 이미지는 README 전용으로 `docs/images/` 폴더에 관리합니다.
+
+![클래스 다이어그램](docs/images/class_diagram.png)
+
+![시퀀스 다이어그램](docs/images/sequence_diagram.png)
 
 PlantUML CLI나 VSCode 플러그인, 또는 [PlantUML 온라인 서버](https://www.plantuml.com/plantuml/)에서 렌더링할 수 있습니다.
 

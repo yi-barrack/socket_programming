@@ -19,7 +19,7 @@ public final class ServerMain {
     public static void main(String[] args) {
         ensureWebRoot(); // 기본 www 디렉터리와 index.html 생성
         // 정적 파일을 처리하는 핸들러와 라우터를 묶어둔다.
-        StaticFileHandler staticHandler = new StaticFileHandler(ServerConfig.WEB_ROOT);
+        StaticFileHandler staticHandler = new StaticFileHandler(ServerConfig.WEB_ROOT); // www 디렉토리가 루트가 됨
         Router router = new Router(staticHandler);
         // NetAcceptor가 실질적으로 소켓 수락과 워커 스케줄링을 담당한다.
         NetAcceptor acceptor = new NetAcceptor(router);

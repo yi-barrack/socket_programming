@@ -14,7 +14,7 @@ public final class Router {
     public Router(Handler staticFileHandler) {
         this.staticFileHandler = staticFileHandler;
     }
-
+    
     public HttpResponse route(HttpRequest request) throws IOException {
         String method = request.method();
         if ("GET".equals(method) || "HEAD".equals(method)) {

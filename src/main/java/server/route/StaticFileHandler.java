@@ -17,6 +17,7 @@ public final class StaticFileHandler implements Handler {
     private final Path root;
 
     public StaticFileHandler(Path root) {
+        // 생성자이다. 루트 경로를 절대 경로로 정규화하여 저장한다.
         this.root = root.normalize().toAbsolutePath();
     }
 
