@@ -1,9 +1,11 @@
 package server;
 
 /* 전부 직접 작성한 커스텀 라이브러리 */
+import server.app.AppRoutes; /* 애플리케이션 라우트 설정 */
 import server.config.ServerConfig; /* 서버 설정 파일 import*/
 import server.core.NetAcceptor; /* 네트워크 수락기 import */
 import server.route.Router; /* 라우터 import */
+import server.route.RouteRegistry; /* 애플리케이션 라우트 레지스트리 */
 import server.route.SimplePostHandler; /* POST 핸들러 import */
 import server.route.StaticFileHandler; /* 정적 파일 핸들러 import */
 import server.util.Logger; /* 로거 유틸리티 import */
@@ -22,7 +24,8 @@ public final class ServerMain {
         // 정적 파일을 처리하는 핸들러와 라우터를 묶어둔다.
         StaticFileHandler staticHandler = new StaticFileHandler(ServerConfig.WEB_ROOT); // www 디렉토리가 루트가 됨
         SimplePostHandler postHandler = new SimplePostHandler(); // POST 요청을 단순히 에코해주는 핸들러
-        Router router = new Router(staticHandler, postHandler);
+        RouteRegistry routeRegistry = AppRoutes.createDefaultRoutes(); // 애플리케이션 전용 라우트 등록
+        Router router = new Router(staticHandler, postHandler, routeRegistry);
         // NetAcceptor가 실질적으로 소켓 수락과 워커 스케줄링을 담당한다.
         NetAcceptor acceptor = new NetAcceptor(router);
         // JVM 종료 시점에도 서버가 깔끔히 내려가도록 훅을 등록한다.

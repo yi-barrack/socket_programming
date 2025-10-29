@@ -27,8 +27,17 @@ java -jar target/simple-java-server-0.1.0.jar
 * `server.core.NetAcceptor` – `ServerSocket`을 열고 연결을 받으면 `ConnectionWorker`에 위임합니다.
 * `server.core.ConnectionWorker` – 각 연결에 대한 요청 파싱, 라우팅, 응답 작성을 담당합니다.
 * `server.http.*` – HTTP 요청/응답 객체, 파서, 응답 작성기, keep-alive 정책 등이 포함됩니다.
-* `server.route.*` – 기본 라우터와 정적 파일 핸들러.
+* `server.route.*` – 기본 라우터, 정적 파일 핸들러, 애플리케이션 라우트 레지스트리.
 * `server.util.*` – 콘솔 로거와 MIME 타입 헬퍼.
+
+## 애플리케이션 라우트 확장
+
+동적인 웹 어플리케이션 기능은 `server.app` 패키지에 구성합니다.
+
+* `server.app.AppRoutes` – 애플리케이션 전용 라우트를 등록하는 곳입니다. 필요 시 새로운 URL 경로와 핸들러를 여기에 추가하세요.
+* `server.app.handlers.LoginGetHandler` – 로그인 폼을 렌더링하는 GET 핸들러 예시.
+* `server.app.handlers.LoginPostHandler` – 로그인 제출을 처리하는 POST 핸들러 예시 (TODO 영역에 인증 로직을 구현).
+* 라우트 등록은 `RouteRegistry`를 통해 이루어지며, `Router` 가 우선적으로 앱 라우트를 검사한 뒤 정적 파일을 서비스합니다.
 
 ## 다이어그램
 
@@ -49,10 +58,14 @@ PlantUML CLI나 VSCode 플러그인, 또는 [PlantUML 온라인 서버](https://
 간단한 POST 요청은 다음과 같이 확인할 수 있습니다.
 
 ```bash
+# 애플리케이션 라우트 (샘플 로그인)
+curl -i -X POST http://localhost:8080/login -d "username=test&password=secret"
+
+# 기본 POST 핸들러(등록되지 않은 경로)
 curl -i -X POST http://localhost:8080/submit -d "name=sejong&message=hello"
 ```
 
-요청 본문과 헤더 정보가 평문으로 Echo 되며, `201 Created` 응답이 내려옵니다.
+`/login`은 샘플 로그인 핸들러가 처리하며, `/submit`은 기본 POST 핸들러가 요청 내용을 그대로 에코합니다.
 
 ## 개발 메모
 
