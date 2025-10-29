@@ -1,0 +1,4 @@
+browser/Renderer.class
+net/http/HttpResponse.class
+browser/SimpleBrowserApp.class
+net/http/SocketHttpClient.class
