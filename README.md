@@ -44,6 +44,16 @@ PlantUML 소스는 `docs/` 디렉터리에 있습니다.
 
 PlantUML CLI나 VSCode 플러그인, 또는 [PlantUML 온라인 서버](https://www.plantuml.com/plantuml/)에서 렌더링할 수 있습니다.
 
+## POST 테스트
+
+간단한 POST 요청은 다음과 같이 확인할 수 있습니다.
+
+```bash
+curl -i -X POST http://localhost:8080/submit -d "name=sejong&message=hello"
+```
+
+요청 본문과 헤더 정보가 평문으로 Echo 되며, `201 Created` 응답이 내려옵니다.
+
 ## 개발 메모
 
 * HTTP/1.0/1.1 기본 규칙만 지원하며, chunked 전송과 압축은 구현하지 않았습니다.
