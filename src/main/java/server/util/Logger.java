@@ -20,6 +20,12 @@ public final class Logger {
         System.out.println(timestamp() + " [WARN ] " + message);
     }
 
+    // 메시지만을 받는 오버로딩된 error 메서드를 추가하여
+    // Logger.error("...") 형태로 호출할 수 있도록 합니다.
+    public static void error(String message) {
+        System.err.println(timestamp() + " [ERROR] " + message);
+    }
+
     public static void error(String message, Throwable t) {
         System.err.println(timestamp() + " [ERROR] " + message);
         if (t != null) {
