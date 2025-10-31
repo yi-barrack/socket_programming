@@ -7,8 +7,13 @@ import java.nio.file.Files; /* 네트워크 수락기 import */
 import server.config.ServerConfig; /* 라우터 import */
 import server.core.NetAcceptor; /* 인증 핸들러 import */
 import server.route.AuthHandler; /* 정적 파일 핸들러 import */
+import server.route.PostCreationHandler;
+import server.route.PostDeleteHandler;
 import server.route.Router; /* 로거 유틸리티 import */
+import server.route.RoutedPostHandler;
+import server.route.SimplePostHandler;
 import server.route.StaticFileHandler;
+import server.service.PostService;
 import server.util.Logger;
 
 /**
@@ -21,8 +26,20 @@ public final class ServerMain {
         ensureWebRoot(); // 기본 www 디렉터리와 index.html 생성
         // 정적 파일을 처리하는 핸들러와 라우터를 묶어둔다.
         StaticFileHandler staticHandler = new StaticFileHandler(ServerConfig.WEB_ROOT); // www 디렉토리가 루트가 됨
+        SimplePostHandler defaultPostHandler = new SimplePostHandler(); // POST 요청을 단순히 에코해주는 핸들러
         AuthHandler authHandler = new AuthHandler(); // 로그인/회원가입 처리 핸들러
-        Router router = new Router(staticHandler, authHandler);
+        PostService postService = new PostService();
+        PostCreationHandler postCreationHandler = new PostCreationHandler(postService);
+        PostDeleteHandler postDeleteHandler = new PostDeleteHandler(postService);
+
+        RoutedPostHandler routedPostHandler = new RoutedPostHandler(defaultPostHandler);
+        routedPostHandler.register("/login", authHandler);
+        routedPostHandler.register("/register", authHandler);
+        routedPostHandler.register("/logout", authHandler);
+        routedPostHandler.register("/posts/create", postCreationHandler);
+        routedPostHandler.register("/posts/delete", postDeleteHandler);
+
+        Router router = new Router(staticHandler, routedPostHandler);
         // NetAcceptor가 실질적으로 소켓 수락과 워커 스케줄링을 담당한다.
         NetAcceptor acceptor = new NetAcceptor(router);
         // JVM 종료 시점에도 서버가 깔끔히 내려가도록 훅을 등록한다.

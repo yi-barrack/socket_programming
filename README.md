@@ -56,11 +56,25 @@ curl -i -X POST http://localhost:8080/submit -d "name=sejong&message=hello"
 
 ### POST 라우트 확장
 
-`Router` 는 `registerPost("/login", handler)` 형태로 경로별 POST 핸들러를 등록할 수 있습니다.  
-등록된 경로가 없으면 기본 `SimplePostHandler` 가 요청 내용을 그대로 에코합니다.
+`RoutedPostHandler` 를 통해 `register("/login", handler)` 형태로 경로별 POST 핸들러를 등록할 수 있습니다.
+`Router` 는 여전히 단일 POST 핸들러만 받지만, `RoutedPostHandler` 가 내부에서 경로를 분기하여
+등록된 핸들러로 위임합니다. 등록된 경로가 없으면 기본 `SimplePostHandler` 가 요청 내용을 그대로 에코합니다.
+
+### 기본 제공 POST 라우트
+
+서버는 다음과 같은 POST 엔드포인트를 기본으로 제공합니다.
+
+| 경로 | 설명 |
+| --- | --- |
+| `/login`, `/register`, `/logout` | `AuthHandler`가 JSON 기반 로그인/회원가입/로그아웃을 처리합니다. |
+| `/posts/create` | `PostCreationHandler`가 게시글을 생성하여 `www/posts/`에 저장합니다. |
+| `/posts/delete` | `PostDeleteHandler`가 게시글 파일을 삭제합니다. |
+
+그 외 경로에 대한 POST 요청은 `SimplePostHandler`가 요청 본문을 그대로 응답으로 돌려줍니다.
 
 ## 개발 메모
 
 * HTTP/1.0/1.1 기본 규칙만 지원하며, chunked 전송과 압축은 구현하지 않았습니다.
 * `Connection: keep-alive` 정책을 적용하여 연결당 최대 100개의 요청을 처리합니다.
 * 정적 파일 접근 시 디렉터리 탈출(`..`)을 방지합니다.
+* Git 커밋을 원격 저장소에 푸시하는 절차는 [`docs/git_push.md`](docs/git_push.md)에서 확인할 수 있습니다.
