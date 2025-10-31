@@ -54,6 +54,11 @@ curl -i -X POST http://localhost:8080/submit -d "name=sejong&message=hello"
 
 요청 본문과 헤더 정보가 평문으로 Echo 되며, `201 Created` 응답이 내려옵니다.
 
+### POST 라우트 확장
+
+`Router` 는 `registerPost("/login", handler)` 형태로 경로별 POST 핸들러를 등록할 수 있습니다.  
+등록된 경로가 없으면 기본 `SimplePostHandler` 가 요청 내용을 그대로 에코합니다.
+
 ## 개발 메모
 
 * HTTP/1.0/1.1 기본 규칙만 지원하며, chunked 전송과 압축은 구현하지 않았습니다.
