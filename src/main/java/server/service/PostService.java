@@ -4,12 +4,12 @@ package server.service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import server.config.ServerConfig;
 import server.util.Logger;
 
 /**
@@ -17,12 +17,17 @@ import server.util.Logger;
  * posts/ 디렉토리에 텍스트 파일로 게시글을 저장
  */
 public final class PostService {
-    private static final Path POSTS_DIR = Paths.get("www", "posts");
+    private final Path postsDir;
     private static final DateTimeFormatter DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public PostService() {
+        this(ServerConfig.WEB_ROOT.resolve("posts"));
+    }
+
+    public PostService(Path postsDir) {
+        this.postsDir = postsDir.normalize();
         try {
-            Files.createDirectories(POSTS_DIR);
+            Files.createDirectories(this.postsDir);
         } catch (IOException e) {
             Logger.error("Failed to create posts directory", e);
         }
@@ -38,7 +43,7 @@ public final class PostService {
 
         try {
             String filename = generateFilename(title);
-            Path postFile = POSTS_DIR.resolve(filename);
+            Path postFile = postsDir.resolve(filename);
             
             StringBuilder postContent = new StringBuilder();
             postContent.append("제목: ").append(title).append("\n");
@@ -62,7 +67,7 @@ public final class PostService {
     public List<String> listPosts() {
         List<String> posts = new ArrayList<>();
         try {
-            Files.list(POSTS_DIR)
+            Files.list(postsDir)
                 .filter(Files::isRegularFile)
                 .filter(path -> path.toString().endsWith(".txt"))
                 .forEach(path -> posts.add(path.getFileName().toString()));
@@ -70,6 +75,32 @@ public final class PostService {
             Logger.error("Failed to list posts", e);
         }
         return posts;
+    }
+
+    /**
+     * 게시글 삭제
+     */
+    public boolean deletePost(String filename) {
+        if (filename == null || filename.trim().isEmpty()) {
+            return false;
+        }
+
+        Path postFile = postsDir.resolve(filename).normalize();
+        if (!postFile.startsWith(postsDir)) {
+            // 디렉터리 탈출 방지
+            return false;
+        }
+
+        try {
+            boolean deleted = Files.deleteIfExists(postFile);
+            if (deleted) {
+                Logger.info("Post deleted: " + filename);
+            }
+            return deleted;
+        } catch (Exception e) {
+            Logger.error("Failed to delete post: " + filename, e);
+            return false;
+        }
     }
 
     /**
