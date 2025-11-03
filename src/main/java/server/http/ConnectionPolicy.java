@@ -2,9 +2,7 @@ package server.http;
 
 import server.config.ServerConfig;
 
-/**
- * HTTP 버전과 Connection 헤더를 바탕으로 keep-alive 여부와 응답 헤더를 결정한다.
- */
+// HTTP 버전/헤더를 보고 keep-alive를 유지할지 말지 정하는 헬퍼
 public final class ConnectionPolicy {
 
     public boolean shouldKeepAlive(HttpRequest request, int requestsServed) {
@@ -26,7 +24,7 @@ public final class ConnectionPolicy {
 
     public void applyResponseHeaders(HttpResponse.Builder builder, boolean keepAlive) {
         if (keepAlive) {
-            // 지속 연결을 허용하면 Connection과 Keep-Alive 헤더를 내려준다.
+            // 계속 연결 유지할 거면 Connection/Keep-Alive 헤더를 직접 적어준다.
             builder.header("Connection", "keep-alive");
             builder.header("Keep-Alive", "timeout=" + (ServerConfig.KEEP_ALIVE_TIMEOUT_MILLIS / 1000)
                     + ", max=" + ServerConfig.KEEP_ALIVE_MAX_REQUESTS);

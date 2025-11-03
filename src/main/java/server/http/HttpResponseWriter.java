@@ -10,19 +10,17 @@ import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * HttpResponse 객체를 실제 HTTP 응답 포맷(상태라인/헤더/본문)으로 직렬화한다.
- */
+// HttpResponse 객체를 실제 소켓에 쓸 수 있는 HTTP 응답 텍스트로 바꿔준다.
 public final class HttpResponseWriter {
 
     public void write(OutputStream out, HttpResponse response, boolean includeBody) throws IOException {
         Map<String, String> headers = new LinkedHashMap<>(response.headers());
-        // Date, Server 헤더가 없다면 기본 값을 채워 넣는다.
+        // Date, Server 헤더가 빠져 있으면 기본값으로 채워준다.
         headers.putIfAbsent("Date", DateTimeFormatter.RFC_1123_DATE_TIME
                 .format(ZonedDateTime.now(java.time.ZoneOffset.UTC)));
         headers.putIfAbsent("Server", ServerConfig.SERVER_NAME);
 
-        // HEAD 같은 경우 본문 전송을 생략할 수 있도록 플래그로 분리한다.
+        // HEAD 요청처럼 본문이 필요 없을 때는 빈 배열로 대체한다.
         byte[] body = includeBody ? response.body() : new byte[0];
         headers.put("Content-Length", Integer.toString(body.length));
 

@@ -10,21 +10,19 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-/**
- * 요청 경로를 기반으로 정적 파일을 찾아 반환하는 기본 핸들러.
- */
+// www 루트에서 정적 파일을 찾아 내려주는 핸들러
 public final class StaticFileHandler implements Handler {
     private final Path root;
 
     public StaticFileHandler(Path root) {
-        // 생성자이다. 루트 경로를 절대 경로로 정규화하여 저장한다.
+        // 루트 경로를 절대 경로로 정리해 둔다.
         this.root = root.normalize().toAbsolutePath();
     }
 
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {
         String target = request.target();
-        // 쿼리 스트링을 제외한 경로만 사용한다.
+        // 쿼리스트링을 버리고 경로만 쓴다.
         String pathPart = target.split("\\?", 2)[0];
         if (pathPart.isEmpty()) {
             pathPart = "/";
@@ -50,7 +48,7 @@ public final class StaticFileHandler implements Handler {
     private Path resolvePath(String pathPart) {
         String cleaned = stripLeadingSlash(pathPart);
         if (cleaned.contains("..")) {
-            // 상대경로 탈출 시도는 즉시 차단한다.
+            // 상대경로 탈출 시도는 바로 차단
             return null;
         }
         Path candidate = root.resolve(cleaned).normalize();

@@ -1,5 +1,14 @@
 package server.core;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
 import server.config.ServerConfig;
 import server.filter.Filter;
 import server.filter.FilterChain;
@@ -12,19 +21,7 @@ import server.http.HttpResponseWriter;
 import server.route.Router;
 import server.util.Logger;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.net.SocketException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-
-/**
- * 단일 TCP 연결에 대한 HTTP 요청/응답 처리를 담당하는 워커.
- * keep-alive를 고려하여 하나의 소켓에서 여러 요청을 순차적으로 처리한다.
- */
+// 하나의 소켓을 맡아서 HTTP 요청을 읽고 응답까지 보내는 워커 스레드
 public final class ConnectionWorker implements Runnable {
 
     private final Socket socket;
@@ -46,7 +43,7 @@ public final class ConnectionWorker implements Runnable {
     @Override
     public void run() {
         try (Socket s = socket) {
-            // 읽기 타임아웃을 걸어 유휴 연결이 무한정 대기하지 않도록 한다.
+            // 아무것도 안 오는 연결이 너무 오래 붙어있지 않게 타임아웃을 건다.
             s.setSoTimeout(ServerConfig.SOCKET_TIMEOUT_MILLIS);
             BufferedInputStream in = new BufferedInputStream(s.getInputStream());
             OutputStream out = s.getOutputStream();
@@ -55,14 +52,14 @@ public final class ConnectionWorker implements Runnable {
             do {
                 HttpRequest request;
                 try {
-                    // 요청 라인/헤더/바디를 순서대로 파싱한다.
+                    // 요청 라인 -> 헤더 -> 바디 순으로 읽어온다.
                     request = parser.parse(in);
                 } catch (SocketTimeoutException e) {
                     Logger.warn("Socket timeout from " + s.getRemoteSocketAddress());
                     break;
                 } catch (HttpParseException e) {
                     Logger.warn("Bad request from " + s.getRemoteSocketAddress() + ": " + e.getMessage());
-                    // 파싱 실패가 났을 때 이미 클라이언트가 연결을 끊었으면 오류 응답을 보내지 않는다.
+                    // 이미 연결이 끊어졌으면 굳이 에러 응답 안 보낸다.
                     if (!s.isOutputShutdown() && !s.isClosed()) {
                         sendError(out, 400, "Bad Request", e.getMessage());
                     } else {
@@ -71,12 +68,13 @@ public final class ConnectionWorker implements Runnable {
                     break;
                 }
                 if (request == null) {
-                    // 클라이언트가 연결을 종료한 경우 null 반환으로 루프를 마친다.
+                    // 읽을 게 없으면(연결 종료) 루프 탈출
                     break;
                 }
 
                 HttpResponse response;
                 try {
+                    // 필터 체인 태워서 실제 핸들러까지 실행한다.
                     FilterChain chain = new FilterChain(filters, router);
                     response = chain.doFilter(request);
                 } catch (Exception e) {
@@ -88,7 +86,7 @@ public final class ConnectionWorker implements Runnable {
                 }
                 handledRequests++;
                 keepAlive = policy.shouldKeepAlive(request, handledRequests);
-                // 기존 응답 객체를 기반으로 keep-alive 헤더 등을 보강한다.
+                // 기존 응답에 keep-alive 헤더 같은 것들을 덧붙인다.
                 HttpResponse.Builder builder = HttpResponse.builder(response.statusCode(), response.reasonPhrase());
                 response.headers().forEach(builder::header);
                 builder.body(response.body());
@@ -104,6 +102,7 @@ public final class ConnectionWorker implements Runnable {
 
     private void sendError(OutputStream out, int status, String reason, String message) {
         try {
+            // 간단한 텍스트 에러 응답 만들어서 내려준다.
             HttpResponse response = HttpResponse.builder(status, reason)
                     .header("Content-Type", "text/plain; charset=UTF-8")
                     .body(message.getBytes(StandardCharsets.UTF_8))

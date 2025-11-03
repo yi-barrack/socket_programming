@@ -11,10 +11,7 @@ import java.util.Optional;
 import server.model.Session;
 import server.util.Logger;
 
-/**
- * 파일 기반 세션 관리자
- * sessions/ 디렉토리에 세션 정보를 파일로 저장
- */
+// sessions/ 폴더에 세션 정보를 파일로 저장해서 관리한다.
 public final class SessionManager {
     private static final Path SESSIONS_DIR = Paths.get("sessions");
     private static final DateTimeFormatter DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -28,16 +25,12 @@ public final class SessionManager {
         }
     }
 
-    /**
-     * 새 세션 생성
-     */
+    // 기본 유효 기간으로 새 세션을 만든다.
     public Session createSession(String username) {
         return createSession(username, DEFAULT_SESSION_DURATION_MINUTES);
     }
 
-    /**
-     * 새 세션 생성 (지속시간 지정)
-     */
+    // 원하는 시간만큼 유지되는 세션을 만들어준다.
     public Session createSession(String username, long durationMinutes) {
         Session session = new Session(username, durationMinutes);
         saveSession(session);
@@ -45,9 +38,7 @@ public final class SessionManager {
         return session;
     }
 
-    /**
-     * 세션 검증 및 조회
-     */
+    // 세션 ID를 받아서 아직 살아 있는지 확인하고 있으면 돌려준다.
     public Optional<Session> getValidSession(String sessionId) {
         if (sessionId == null || sessionId.trim().isEmpty()) {
             return Optional.empty();
@@ -67,9 +58,7 @@ public final class SessionManager {
         return Optional.of(session);
     }
 
-    /**
-     * 세션 삭제 (로그아웃)
-     */
+    // 세션 파일을 삭제해서 로그아웃 처리한다.
     public void deleteSession(String sessionId) {
         if (sessionId == null || sessionId.trim().isEmpty()) {
             return;
@@ -84,9 +73,7 @@ public final class SessionManager {
         }
     }
 
-    /**
-     * 만료된 세션들 정리
-     */
+    // 오래된 세션 파일을 다 돌아보면서 만료된 것만 지운다.
     public void cleanupExpiredSessions() {
         try {
             Files.list(SESSIONS_DIR)
@@ -104,9 +91,7 @@ public final class SessionManager {
         }
     }
 
-    /**
-     * 세션 정보 로드
-     */
+    // 파일에 저장된 세션을 읽어서 Session 객체로 되살린다.
     private Optional<Session> loadSession(String sessionId) {
         Path sessionFile = SESSIONS_DIR.resolve(sessionId + ".txt");
         if (!Files.exists(sessionFile)) {
@@ -136,9 +121,7 @@ public final class SessionManager {
         }
     }
 
-    /**
-     * 세션 정보 저장
-     */
+    // Session 객체 내용을 그대로 텍스트 파일로 저장한다.
     private void saveSession(Session session) {
         Path sessionFile = SESSIONS_DIR.resolve(session.getSessionId() + ".txt");
         

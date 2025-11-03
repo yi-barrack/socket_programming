@@ -3,18 +3,12 @@ package server.util;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * 간단한 JSON 파싱 유틸리티
- * 복잡한 JSON 라이브러리 대신 기본적인 key-value 파싱만 지원
- */
+// 외부 라이브러리 대신 간단하게 JSON 문자열을 다루는 유틸
 public final class JsonUtil {
 
     private JsonUtil() {}
 
-    /**
-     * 간단한 JSON 객체를 Map으로 파싱
-     * 예: {"username":"test","password":"123"} -> Map
-     */
+    // {"username":"test"} 같은 단순 JSON을 Map으로 바꿔준다.
     public static Map<String, String> parseSimpleJson(String json) {
         Map<String, String> result = new HashMap<>();
         
@@ -58,9 +52,7 @@ public final class JsonUtil {
         return result;
     }
 
-    /**
-     * Map을 간단한 JSON 문자열로 변환
-     */
+    // Map<String, String>을 간단한 JSON 문자열로 바꿔 준다.
     public static String toSimpleJson(Map<String, String> map) {
         if (map == null || map.isEmpty()) {
             return "{}";
@@ -84,9 +76,7 @@ public final class JsonUtil {
         return json.toString();
     }
 
-    /**
-     * 성공/실패 응답 JSON 생성
-     */
+    // success + message 조합을 빠르게 만들고 싶을 때 사용
     public static String createResponse(boolean success, String message) {
         Map<String, String> response = new HashMap<>();
         response.put("success", String.valueOf(success));
@@ -94,6 +84,7 @@ public final class JsonUtil {
         return toSimpleJson(response);
     }
 
+    // 게시글 목록처럼 문자열 리스트를 함께 내려보낼 때 쓰는 JSON 생성기
     public static String createListResponse(boolean success, String message, java.util.List<String> items) {
         StringBuilder json = new StringBuilder();
         json.append("{");
@@ -112,9 +103,7 @@ public final class JsonUtil {
         return json.toString();
     }
 
-    /**
-     * 따옴표 제거
-     */
+    // 양 끝에 붙은 따옴표만 간단히 떼어내는 함수
     private static String removeQuotes(String str) {
         if (str.length() >= 2 && str.startsWith("\"") && str.endsWith("\"")) {
             return str.substring(1, str.length() - 1);
@@ -122,9 +111,7 @@ public final class JsonUtil {
         return str;
     }
 
-    /**
-     * JSON 문자열 이스케이프
-     */
+    // JSON에 들어갈 문자열을 이스케이프 처리한다.
     public static String escapeJson(String str) {
         if (str == null) {
             return "";

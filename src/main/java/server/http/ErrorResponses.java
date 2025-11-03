@@ -2,9 +2,7 @@ package server.http;
 
 import java.nio.charset.StandardCharsets;
 
-/**
- * 필터나 예외 처리에서 재사용하는 공통 에러 응답 생성기.
- */
+// 여러 곳에서 쓰는 에러 응답 템플릿 모음
 public final class ErrorResponses {
     private ErrorResponses() {}
 
@@ -33,6 +31,7 @@ public final class ErrorResponses {
     }
 
     private static HttpResponse build(int status, String reason, String message, String home) {
+        // 간단한 HTML 페이지 만들어서 에러 안내 띄운다.
         String body = "<!DOCTYPE html>\n" +
                 "<html lang=\"ko\">\n" +
                 "<head><meta charset=\"UTF-8\"><title>" + reason + "</title></head>\n" +
@@ -48,6 +47,7 @@ public final class ErrorResponses {
     }
 
     private static String escape(String text) {
+        // 아주 간단한 HTML escape 처리
         return text.replace("&", "&amp;")
                 .replace("<", "&lt;")
                 .replace(">", "&gt;");

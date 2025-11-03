@@ -20,10 +20,7 @@ import server.route.Router;
 import server.util.Logger;
 import server.util.SslContextProvider;
 
-/**
- * 클라이언트 연결을 받아 ConnectionWorker에 위임하는 구성 요소.
- * ServerSocket과 워커 스레드 풀을 관리하며, start-stop 라이프사이클을 책임진다.
- */
+// 새 연결을 받아서 워커 스레드에게 던지는 역할. 소켓 열고 닫는 것도 여기서 한다.
 public final class NetAcceptor implements Closeable {
     private final Router router;
     private final List<Filter> filters;
@@ -37,11 +34,12 @@ public final class NetAcceptor implements Closeable {
     }
 
     public void start() throws IOException {
-        // 다중 호출을 방지하기 위해 락으로 상태를 확인한다.
+        // 여러 번 start() 호출되지 않게 동기화
         synchronized (this) {
             if (running) {
                 return;
             }
+            // 워커 스레드 만들고 소켓을 연다.
             executor = Executors.newFixedThreadPool(ServerConfig.WORKER_THREADS);
             serverSocket = createServerSocket();
             serverSocket.setSoTimeout(1000);
@@ -51,11 +49,11 @@ public final class NetAcceptor implements Closeable {
         try {
             while (isRunning()) {
                 try {
-                    // 새 연결을 수락하면 워커에게 처리하도록 맡긴다.
+                    // 새 연결이 오면 ConnectionWorker에게 넘겨 처리.
                     Socket socket = serverSocket.accept();
                     executor.execute(new ConnectionWorker(socket, router, filters));
                 } catch (SocketTimeoutException e) {
-                    // 1초마다 깨어나서 running 플래그를 점검한다.
+                    // 1초마다 빠져나와서 running 상태 체크
                 } catch (IOException e) {
                     if (isRunning()) {
                         Logger.error("Accept failed", e);
@@ -81,6 +79,7 @@ public final class NetAcceptor implements Closeable {
             if (!running) {
                 return;
             }
+            // 더 이상 새 연결 받지 않도록 플래그 내려주고 소켓 닫기
             running = false;
             if (serverSocket != null && !serverSocket.isClosed()) {
                 serverSocket.close();
@@ -91,6 +90,7 @@ public final class NetAcceptor implements Closeable {
     }
 
     private void cleanup() {
+        // 스레드풀 정리. 깔끔히 끝나면 좋고 아니면 강제 종료.
         if (executor != null) {
             executor.shutdown();
             try {
@@ -108,10 +108,12 @@ public final class NetAcceptor implements Closeable {
 
     private ServerSocket createServerSocket() throws IOException {
         if (!ServerConfig.HTTPS_ENABLED) {
+            // 일반 HTTP 모드일 때 사용하는 ServerSocket
             ServerSocket socket = new ServerSocket();
             socket.bind(new InetSocketAddress(ServerConfig.PORT), ServerConfig.ACCEPT_BACKLOG);
             return socket;
         }
+        // HTTPS 모드면 키스토어로부터 SSL 소켓을 만든다.
         SSLServerSocketFactory factory = SslContextProvider.serverSocketFactory();
         SSLServerSocket socket = (SSLServerSocket) factory.createServerSocket(ServerConfig.PORT, ServerConfig.ACCEPT_BACKLOG);
         socket.setEnabledProtocols(ServerConfig.ENABLED_PROTOCOLS);

@@ -5,9 +5,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * 파일 확장자를 간단한 MIME 타입 문자열로 매핑해 주는 유틸리티.
- */
+// 파일 확장자 보고 적당한 Content-Type 문자열을 골라주는 유틸
 public final class MimeTypes {
     private static final Map<String, String> TYPES = new HashMap<>();
 
@@ -36,6 +34,7 @@ public final class MimeTypes {
                 return type;
             }
         }
+        // 모르면 바이너리로 취급한다.
         return "application/octet-stream";
     }
 }

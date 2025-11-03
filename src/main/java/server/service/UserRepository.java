@@ -13,10 +13,7 @@ import java.util.Optional;
 import server.model.User;
 import server.util.Logger;
 
-/**
- * 파일 시스템 기반 사용자 저장소
- * users/ 디렉토리에 각 사용자별로 파일을 생성하여 정보를 저장
- */
+// users/ 폴더를 이용해서 사용자 정보를 파일로 저장하는 저장소
 public final class UserRepository {
     private static final Path USERS_DIR = Paths.get("users");
     private static final DateTimeFormatter DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -29,9 +26,7 @@ public final class UserRepository {
         }
     }
 
-    /**
-     * 사용자 등록
-     */
+    // 새 유저를 등록하고 파일로 저장한다.
     public boolean registerUser(String username, String password) {
         if (username == null || username.trim().isEmpty() || password == null || password.isEmpty()) {
             return false;
@@ -54,9 +49,7 @@ public final class UserRepository {
         }
     }
 
-    /**
-     * 사용자 로그인 검증
-     */
+    // 아이디/비밀번호가 맞는지 확인한다.
     public boolean authenticateUser(String username, String password) {
         if (username == null || password == null) {
             return false;
@@ -81,9 +74,7 @@ public final class UserRepository {
         return false;
     }
 
-    /**
-     * 사용자 존재 여부 확인
-     */
+    // 파일이 존재하는지만 보고 사용자 여부를 확인한다.
     public boolean userExists(String username) {
         if (username == null || username.trim().isEmpty()) {
             return false;
@@ -92,9 +83,7 @@ public final class UserRepository {
         return Files.exists(userFile);
     }
 
-    /**
-     * 사용자 정보 로드
-     */
+    // 저장된 사용자 파일을 읽어서 User 객체로 만든다.
     public Optional<User> loadUser(String username) {
         if (username == null || username.trim().isEmpty()) {
             return Optional.empty();
@@ -132,9 +121,7 @@ public final class UserRepository {
         }
     }
 
-    /**
-     * 사용자 정보 저장
-     */
+    // User 객체 내용을 텍스트 파일로 저장한다.
     private void saveUser(User user) {
         Path userFile = USERS_DIR.resolve(user.getUsername() + ".txt");
         
@@ -153,9 +140,7 @@ public final class UserRepository {
         }
     }
 
-    /**
-     * 비밀번호 해시화
-     */
+    // SHA-256으로 비밀번호를 해시해서 저장한다.
     private String hashPassword(String password) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");

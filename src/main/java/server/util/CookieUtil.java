@@ -9,16 +9,12 @@ import java.util.Map;
 import server.http.HttpRequest;
 import server.http.HttpResponse;
 
-/**
- * HTTP 쿠키 처리 유틸리티
- */
+// 쿠키 읽고 쓰는 데 필요한 잡다한 유틸
 public final class CookieUtil {
 
     private CookieUtil() {}
 
-    /**
-     * 요청에서 쿠키 파싱
-     */
+    // 요청 헤더에서 쿠키 문자열을 파싱해서 Map으로 돌려준다.
     public static Map<String, String> parseCookies(HttpRequest request) {
         Map<String, String> cookies = new HashMap<>();
         String cookieHeader = request.header("cookie");
@@ -44,24 +40,18 @@ public final class CookieUtil {
         return cookies;
     }
 
-    /**
-     * 쿠키 값 가져오기
-     */
+    // 이름으로 쿠키 하나만 바로 꺼내고 싶을 때 사용한다.
     public static String getCookie(HttpRequest request, String name) {
         Map<String, String> cookies = parseCookies(request);
         return cookies.get(name);
     }
 
-    /**
-     * 응답에 쿠키 설정 (세션 쿠키)
-     */
+    // 기본 옵션으로 쿠키를 심는다. max-age 같은 건 따로 안 건드린다.
     public static void setCookie(HttpResponse.Builder responseBuilder, String name, String value) {
         setCookie(responseBuilder, name, value, -1, "/", false, true);
     }
 
-    /**
-     * 응답에 쿠키 설정 (상세 옵션)
-     */
+    // 옵션을 직접 넣어서 쿠키를 심고 싶을 때 쓰는 버전
     public static void setCookie(HttpResponse.Builder responseBuilder, String name, String value, 
                                 int maxAgeSeconds, String path, boolean secure, boolean httpOnly) {
         try {
@@ -92,30 +82,22 @@ public final class CookieUtil {
         }
     }
 
-    /**
-     * 쿠키 삭제 (만료시킴)
-     */
+    // 쿠키를 삭제하고 싶을 때 Max-Age를 0으로 만들어서 내려보낸다.
     public static void deleteCookie(HttpResponse.Builder responseBuilder, String name, String path) {
         setCookie(responseBuilder, name, "", 0, path, false, true);
     }
 
-    /**
-     * 세션 쿠키 설정
-     */
+    // 우리 서버에서 쓰는 세션 쿠키(JSESSIONID) 심기
     public static void setSessionCookie(HttpResponse.Builder responseBuilder, String sessionId) {
         setCookie(responseBuilder, "JSESSIONID", sessionId, -1, "/", false, true);
     }
 
-    /**
-     * 세션 쿠키 삭제
-     */
+    // 세션 쿠키 날리기
     public static void deleteSessionCookie(HttpResponse.Builder responseBuilder) {
         deleteCookie(responseBuilder, "JSESSIONID", "/");
     }
 
-    /**
-     * 요청에서 세션 ID 가져오기
-     */
+    // 요청 헤더에서 JSESSIONID만 바로 꺼내기
     public static String getSessionId(HttpRequest request) {
         return getCookie(request, "JSESSIONID");
     }

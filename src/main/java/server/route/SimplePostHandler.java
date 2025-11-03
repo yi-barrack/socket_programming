@@ -8,10 +8,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
-/**
- * POST 요청을 단순히 수신하고 내용을 그대로 돌려주는 핸들러.
- * Body는 UTF-8로 해석하며, 필요 시 Content-Type의 charset 값을 사용한다.
- */
+// 기본 POST 핸들러. 받은 내용을 그대로 요약해서 돌려준다.
 public final class SimplePostHandler implements Handler {
 
     @Override
@@ -57,6 +54,7 @@ public final class SimplePostHandler implements Handler {
         try {
             return Charset.forName(charsetName);
         } catch (Exception e) {
+            // 모르는 인코딩이면 그냥 UTF-8로 처리한다.
             return StandardCharsets.UTF_8;
         }
     }

@@ -11,9 +11,7 @@ import server.util.CookieUtil;
 import server.util.JsonUtil;
 import server.util.Logger;
 
-/**
- * 로그인 및 회원가입 요청을 처리하는 핸들러
- */
+// 로그인/회원가입/로그아웃 POST 요청을 한 번에 처리하는 핸들러
 public final class AuthHandler implements Handler {
     private final AuthService authService;
 
@@ -41,9 +39,7 @@ public final class AuthHandler implements Handler {
         return notFound();
     }
 
-    /**
-     * 로그인 처리
-     */
+    // /login 처리
     private HttpResponse handleLogin(HttpRequest request) {
         try {
             String contentType = request.header("content-type");
@@ -83,9 +79,7 @@ public final class AuthHandler implements Handler {
         }
     }
 
-    /**
-     * 회원가입 처리
-     */
+    // /register 처리
     private HttpResponse handleRegister(HttpRequest request) {
         try {
             String contentType = request.header("content-type");
@@ -120,9 +114,7 @@ public final class AuthHandler implements Handler {
         }
     }
 
-    /**
-     * 로그아웃 처리
-     */
+    // /logout 처리
     private HttpResponse handleLogout(HttpRequest request) {
         try {
             String sessionId = CookieUtil.getSessionId(request);
@@ -146,7 +138,7 @@ public final class AuthHandler implements Handler {
         }
     }
 
-    // Helper methods
+    // 아래는 재사용하는 응답 생성 헬퍼들
     private HttpResponse methodNotAllowed() {
         return HttpResponse.builder(405, "Method Not Allowed")
                 .header("Allow", "POST")

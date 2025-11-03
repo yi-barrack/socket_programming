@@ -6,12 +6,14 @@ import server.http.HttpParseException;
 
 import static server.http.ErrorResponses.*;
 
+// 핸들러에서 터지는 예외를 잡아 사용자 친화적인 에러 페이지로 바꿔준다.
 public final class ExceptionMappingFilter implements Filter {
   private final String home;
   public ExceptionMappingFilter(String home) { this.home = home; }
 
   @Override public HttpResponse doFilter(HttpRequest req, FilterChain chain) {
     try {
+      // 다음 필터나 핸들러로 넘겨본다.
       return chain.doFilter(req);
     } catch (HttpParseException e) {
       return badRequestAlert(req, "요청 구문이 올바르지 않습니다.", home);

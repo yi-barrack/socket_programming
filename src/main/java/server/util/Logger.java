@@ -3,10 +3,7 @@ package server.util;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-/**
- * 간단한 콘솔 로깅 유틸리티.
- * 시간 포맷을 통일하고 로그 레벨별 출력 채널을 나눈다.
- */
+// 콘솔에 찍는 아주 단순한 로거
 public final class Logger {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -28,6 +25,7 @@ public final class Logger {
     }
 
     private static String timestamp() {
+        // 로그마다 같은 형식으로 시간 찍어주기
         return LocalDateTime.now().format(FORMATTER);
     }
 }

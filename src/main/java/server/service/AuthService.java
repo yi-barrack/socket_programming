@@ -5,9 +5,7 @@ import java.util.Optional;
 import server.model.Session;
 import server.model.User;
 
-/**
- * 사용자 인증 통합 서비스
- */
+// 회원가입, 로그인, 세션 검증을 한 곳에서 처리하는 서비스
 public final class AuthService {
     private final UserRepository userRepository;
     private final SessionManager sessionManager;
@@ -17,9 +15,7 @@ public final class AuthService {
         this.sessionManager = new SessionManager();
     }
 
-    /**
-     * 사용자 회원가입
-     */
+    // 아이디/비밀번호를 받아 회원가입을 시도한다.
     public RegisterResult register(String username, String password) {
         if (username == null || username.trim().isEmpty()) {
             return new RegisterResult(false, "아이디를 입력해주세요.");
@@ -41,9 +37,7 @@ public final class AuthService {
         }
     }
 
-    /**
-     * 사용자 로그인
-     */
+    // 로그인 요청을 처리하고 성공하면 세션을 만들어 준다.
     public LoginResult login(String username, String password) {
         if (username == null || username.trim().isEmpty() || password == null || password.isEmpty()) {
             return new LoginResult(false, null, "아이디와 비밀번호를 입력해주세요.");
@@ -58,9 +52,7 @@ public final class AuthService {
         }
     }
 
-    /**
-     * 세션 검증
-     */
+    // 세션 ID가 유효하면 사용자명을 돌려준다.
     public Optional<String> validateSession(String sessionId) {
         if (sessionId == null || sessionId.trim().isEmpty()) {
             return Optional.empty();
@@ -70,32 +62,24 @@ public final class AuthService {
         return sessionOpt.map(Session::getUsername);
     }
 
-    /**
-     * 로그아웃
-     */
+    // 세션 파일을 지워서 로그아웃 처리한다.
     public void logout(String sessionId) {
         if (sessionId != null && !sessionId.trim().isEmpty()) {
             sessionManager.deleteSession(sessionId);
         }
     }
 
-    /**
-     * 사용자 정보 조회
-     */
+    // 저장소에서 사용자 정보를 그대로 읽어온다.
     public Optional<User> getUser(String username) {
         return userRepository.loadUser(username);
     }
 
-    /**
-     * 만료된 세션 정리
-     */
+    // 쌓여 있는 만료 세션들도 주기적으로 날려준다.
     public void cleanupExpiredSessions() {
         sessionManager.cleanupExpiredSessions();
     }
 
-    /**
-     * 회원가입 결과
-     */
+    // 회원가입 결과를 담아두는 단순 DTO
     public static class RegisterResult {
         private final boolean success;
         private final String message;
@@ -114,9 +98,7 @@ public final class AuthService {
         }
     }
 
-    /**
-     * 로그인 결과
-     */
+    // 로그인 처리 결과를 담는 DTO
     public static class LoginResult {
         private final boolean success;
         private final Session session;

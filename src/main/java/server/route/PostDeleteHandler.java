@@ -9,9 +9,7 @@ import server.http.HttpResponse;
 import server.service.PostService;
 import server.util.JsonUtil;
 
-/**
- * 게시글 삭제 요청을 처리하는 핸들러.
- */
+// 게시글 삭제를 담당하는 /posts/delete 핸들러
 public final class PostDeleteHandler implements Handler {
     private final PostService postService;
 

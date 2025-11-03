@@ -4,9 +4,7 @@ package server.model;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/**
- * 사용자 세션 정보를 담는 모델 클래스
- */
+// 로그인한 사용자의 세션 정보를 담는 작은 객체
 public final class Session {
     private final String sessionId;
     private final String username;
@@ -44,6 +42,7 @@ public final class Session {
     }
 
     public boolean isExpired() {
+        // 만료 시간을 지나면 true
         return LocalDateTime.now().isAfter(expiresAt);
     }
 

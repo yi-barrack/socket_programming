@@ -3,6 +3,7 @@ package server.filter;
 import server.http.HttpRequest;
 import server.http.HttpResponse;
 
+// HEAD 요청이면 본문만 비워서 돌려주는 필터
 public final class HeadFilter implements Filter {
   @Override public HttpResponse doFilter(HttpRequest req, FilterChain chain) throws Exception {
     HttpResponse res = chain.doFilter(req);
@@ -17,8 +18,4 @@ public final class HeadFilter implements Filter {
 }
 
 
-/*
- * HeadFilter 는 HEAD 요청인지 확인한 뒤,
- * 체인 뒤쪽에서 만들어진 응답을 복사하여 본문을 제거한다.
- * 실제 응답 헤더(특히 Content-Length)는 그대로 유지된다.
- */
+// HEAD 요청이면 본문 없이 응답해야 하니까 여기서 비워서 반환한다.

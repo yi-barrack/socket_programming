@@ -8,11 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * 경로별 POST 핸들러를 구성할 수 있는 래퍼 핸들러.
- * Router는 단일 POST 핸들러만 지원하므로, 이 클래스를 통해
- * 경로에 따라 다른 핸들러를 위임할 수 있다.
- */
+// POST 요청을 경로별로 나눠서 다른 핸들러에 전달하는 래퍼
 public final class RoutedPostHandler implements Handler {
     private final Map<String, Handler> routes = new HashMap<>();
     private final Handler fallback;
@@ -21,9 +17,7 @@ public final class RoutedPostHandler implements Handler {
         this.fallback = fallback;
     }
 
-    /**
-     * 지정한 경로에 POST 핸들러를 등록한다.
-     */
+    // 원하는 경로에 POST 핸들러를 붙일 수 있게 해준다.
     public void register(String path, Handler handler) {
         if (path == null || handler == null) {
             return;
@@ -51,6 +45,7 @@ public final class RoutedPostHandler implements Handler {
         if (!normalized.startsWith("/")) {
             normalized = "/" + normalized;
         }
+        // 뒤에 쿼리 스트링이 붙어 있다면 잘라낸다.
         int queryIndex = normalized.indexOf('?');
         if (queryIndex >= 0) {
             normalized = normalized.substring(0, queryIndex);

@@ -7,6 +7,7 @@ server/filter/BodyLimitFilter.class
 server/http/HttpResponseWriter.class
 server/http/ConnectionPolicy.class
 server/http/ErrorResponses.class
+server/route/PostListHandler.class
 server/core/ConnectionWorker.class
 server/http/HttpResponse$Builder.class
 server/filter/ExceptionMappingFilter.class
@@ -39,3 +40,4 @@ server/route/PostCreationHandler.class
 server/util/MimeTypes.class
 server/service/AuthService$RegisterResult.class
 server/filter/PathTraversalFilter.class
+server/route/SimplePostHandler.class

@@ -3,9 +3,7 @@ package server.model;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-/**
- * 사용자 정보를 담는 모델 클래스
- */
+// 사용자 한 명의 기본 정보를 담는 모델
 public final class User {
     private final String username;
     private final String passwordHash;
@@ -40,6 +38,7 @@ public final class User {
     }
 
     public User withLastLogin(LocalDateTime lastLoginAt) {
+        // 마지막 로그인 시간만 바꾼 새 객체를 만들어 돌려준다.
         return new User(username, passwordHash, createdAt, lastLoginAt);
     }
 

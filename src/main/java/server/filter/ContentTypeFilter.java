@@ -12,19 +12,13 @@ import java.util.Set;
 
 import static server.http.ErrorResponses.unsupportedMediaTypeAlert;
 
-/**
- * 본문이 있는 요청(POST/PUT/PATCH)에 대해 Content-Type을 검증한다.
- * - Content-Type 누락 또는 비허용 타입이면 415 Unsupported Media Type을 반환한다(브라우저: alert + 홈 이동).
- * - 파라미터(; charset=..., ; boundary=...)는 무시하고 type/subtype만 비교한다.
- */
+// 바디가 있는 요청이면 Content-Type을 체크해서 이상하면 막는 필터
 public final class ContentTypeFilter implements Filter {
 
   private final String home;
-  private final Set<String> allowedTypes; // 소문자, 예: application/json, application/x-www-form-urlencoded, multipart/form-data
+  private final Set<String> allowedTypes; // 전부 소문자로 맞춰둔다.
 
-  /**
-   * 기본 허용: JSON, 폼-URL-encoded, 멀티파트
-   */
+  // 기본으로 많이 쓰는 타입만 허용하는 팩토리 메서드
   public static ContentTypeFilter withDefaults(String home) {
     return new ContentTypeFilter(
         home,
@@ -45,7 +39,7 @@ public final class ContentTypeFilter implements Filter {
   public HttpResponse doFilter(HttpRequest req, FilterChain chain) throws Exception {
     final String method = req.method();
 
-    // 바디를 가질 수 있는 메서드만 검사 (필요 시 PATCH/DELETE 등 확장 가능)
+    // 바디가 붙어서 올 만한 메서드만 검사. 필요하면 다른 메서드도 추가하면 된다.
     if (!"POST".equals(method) && !"PUT".equals(method) && !"PATCH".equals(method)) {
       return chain.doFilter(req);
     }
@@ -58,13 +52,13 @@ public final class ContentTypeFilter implements Filter {
       return chain.doFilter(req);
     }
 
-    // Content-Type 검증
+    // 실제 Content-Type 값 살펴보기
     final String raw = Optional.ofNullable(req.header("content-type")).orElse("").trim();
     if (raw.isEmpty()) {
       return unsupportedMediaTypeAlert(req, "요청 본문에 Content-Type 헤더가 없습니다.", home);
     }
 
-    // 파라미터 제거 후 type/subtype만 비교 (e.g., "application/json; charset=utf-8" → "application/json")
+    // charset 같은 파라미터는 버리고 type/subtype만 비교한다.
     String mediaType = raw.toLowerCase(Locale.ROOT);
     int semi = mediaType.indexOf(';');
     if (semi >= 0) {

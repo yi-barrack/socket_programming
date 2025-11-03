@@ -8,9 +8,7 @@ import server.http.HttpResponse;
 import server.service.PostService;
 import server.util.JsonUtil;
 
-/**
- * 게시글 파일 목록을 반환하는 핸들러.
- */
+// 게시글 파일 목록을 JSON으로 돌려준다.
 public final class PostListHandler implements Handler {
 
     private final PostService postService;

@@ -11,14 +11,11 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * 소켓에서 들어오는 바이트 스트림을 HTTP 요청 객체로 변환하는 파서.
- * HTTP/1.0과 1.1의 기본 규칙만 지원하며, chunked 등은 제외한다.
- */
+// 소켓에서 들어온 바이트를 읽어서 HttpRequest 객체로 바꿔주는 단순 파서
 public final class HttpRequestParser {
 
     public HttpRequest parse(BufferedInputStream in) throws IOException, HttpParseException {
-        // 첫 줄을 읽어 METHOD SP TARGET SP VERSION 을 추출한다.
+        // 첫 줄 읽어서 METHOD SP TARGET SP VERSION 순서를 확인한다.
         String requestLine = readLine(in, ServerConfig.MAX_REQUEST_LINE_LENGTH);
         if (requestLine == null) {
             return null;
@@ -40,7 +37,7 @@ public final class HttpRequestParser {
             throw new HttpParseException("Missing Host header");
         }
 
-        // Content-Length 값을 확인하여 바디 읽을 길이를 결정한다.
+        // Content-Length 보고 바디 길이를 정한다.
         int contentLength = parseContentLength(headers.get("content-length"));
         if (contentLength > ServerConfig.MAX_BODY_SIZE) {
             throw new HttpParseException("Request body too large");
@@ -54,7 +51,7 @@ public final class HttpRequestParser {
         Map<String, String> headers = new LinkedHashMap<>();
         int total = 0;
         while (true) {
-            // 빈 줄이 나올 때까지 헤더를 누적한다.
+            // 빈 줄이 나올 때까지 헤더를 계속 읽는다.
             String line = readLine(in, ServerConfig.MAX_HEADER_LINE_LENGTH);
             if (line == null) {
                 throw new HttpParseException("Unexpected EOF while reading headers");
@@ -95,7 +92,7 @@ public final class HttpRequestParser {
     }
 
     private byte[] readBody(InputStream in, int length) throws IOException {
-        // Content-Length 기반 요청만 처리한다.
+        // 지금은 Content-Length가 있는 요청만 처리한다.
         if (length == 0) {
             return new byte[0];
         }
@@ -114,7 +111,7 @@ public final class HttpRequestParser {
     private String readLine(BufferedInputStream in, int maxLength) throws IOException, HttpParseException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         while (true) {
-            // CRLF가 나올 때까지 읽어 들이고 길이 제한을 초과하면 예외를 던진다.
+            // CRLF 나올 때까지 계속 읽는다. 너무 길면 바로 예외.
             int b = in.read();
             if (b == -1) {
                 if (buffer.size() == 0) {

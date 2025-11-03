@@ -12,10 +12,7 @@ import java.util.List;
 import server.config.ServerConfig;
 import server.util.Logger;
 
-/**
- * 게시글 관리 서비스
- * posts/ 디렉토리에 텍스트 파일로 게시글을 저장
- */
+// 게시글을 www/posts 폴더에 파일 형태로 저장/삭제하는 서비스
 public final class PostService {
     private final Path postsDir;
     private static final DateTimeFormatter DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -33,9 +30,7 @@ public final class PostService {
         }
     }
 
-    /**
-     * 새 게시글 작성
-     */
+    // 새 게시글 파일을 작성한다.
     public boolean createPost(String title, String content, String author) {
         if (title == null || title.trim().isEmpty() || content == null || content.trim().isEmpty()) {
             return false;
@@ -61,9 +56,7 @@ public final class PostService {
         }
     }
 
-    /**
-     * 게시글 목록 조회
-     */
+    // posts 폴더에 있는 파일 이름을 전부 모아서 넘겨준다.
     public List<String> listPosts() {
         List<String> posts = new ArrayList<>();
         try {
@@ -77,9 +70,7 @@ public final class PostService {
         return posts;
     }
 
-    /**
-     * 게시글 삭제
-     */
+    // 파일 이름을 받아서 해당 게시글을 지운다.
     public boolean deletePost(String filename) {
         if (filename == null || filename.trim().isEmpty()) {
             return false;
@@ -103,9 +94,7 @@ public final class PostService {
         }
     }
 
-    /**
-     * 파일명 생성 (제목을 안전한 파일명으로 변환)
-     */
+    // 제목을 안전한 파일명으로 바꿔주는 도우미
     private String generateFilename(String title) {
         String safe = title.replaceAll("[^a-zA-Z0-9가-힣\\s]", "")
                           .replaceAll("\\s+", "_")

@@ -4,10 +4,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * 서버에서 생성한 HTTP 응답의 불변 표현.
- * 상태 코드/이유구문/헤더/본문을 한 번 세팅하면 외부에서 수정할 수 없다.
- */
+// 서버에서 만든 HTTP 응답을 담아두는 간단한 객체. 한 번 만들면 바뀌지 않는다.
 public final class HttpResponse {
     private final int statusCode;
     private final String reasonPhrase;
@@ -37,6 +34,7 @@ public final class HttpResponse {
     }
 
     public byte[] body() {
+        // 호출한 쪽에서 배열 바꿔도 원본이 안 깨지게 복사본을 준다.
         return body.clone();
     }
 
@@ -55,13 +53,13 @@ public final class HttpResponse {
             this.reasonPhrase = reasonPhrase;
         }
 
-        /** 응답 헤더를 추가한다. 같은 이름이 들어오면 덮어쓴다. */
+        // 응답 헤더 추가. 같은 이름이 오면 그냥 덮어씌운다.
         public Builder header(String name, String value) {
             headers.put(name, value);
             return this;
         }
 
-        /** 본문 데이터를 설정한다. null 이면 빈 배열로 처리한다. */
+        // 응답 본문 세팅. null 들어오면 빈 배열로 바꿔둔다.
         public Builder body(byte[] body) {
             this.body = body == null ? new byte[0] : body.clone();
             return this;

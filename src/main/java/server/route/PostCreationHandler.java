@@ -9,9 +9,7 @@ import server.http.HttpResponse;
 import server.service.PostService;
 import server.util.JsonUtil;
 
-/**
- * 게시글 생성 요청을 처리하는 핸들러.
- */
+// 게시글을 새로 만드는 /posts/create 요청을 처리한다.
 public final class PostCreationHandler implements Handler {
     private final PostService postService;
 

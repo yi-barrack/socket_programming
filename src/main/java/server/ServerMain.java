@@ -26,23 +26,24 @@ import server.route.StaticFileHandler;
 import server.service.PostService;
 import server.util.Logger;
 
-/**
- * 서버 실행 진입점.
- * 정적 파일 루트를 준비하고, 라우터/네트워크 수락기를 초기화한 뒤 서버 루프를 시작한다.
- */
+// 서버 전체를 켜고 끄는 메인 클래스. 여기서 필요한 것들 전부 묶어서 실행한다.
 public final class ServerMain {
 
     public static void main(String[] args) {
-        ensureWebRoot(); // 기본 www 디렉터리와 index.html 생성
-        // 정적 파일을 처리하는 핸들러와 라우터를 묶어둔다.
-        StaticFileHandler staticHandler = new StaticFileHandler(ServerConfig.WEB_ROOT); // www 디렉토리가 루트가 됨
-        SimplePostHandler defaultPostHandler = new SimplePostHandler(); // POST 요청을 단순히 에코해주는 핸들러
-        AuthHandler authHandler = new AuthHandler(); // 로그인/회원가입 처리 핸들러
-        PostService postService = new PostService(); // 게시물 관리를 담당하는 서비스
+        ensureWebRoot(); // 기본 www 폴더랑 index.html 챙김
+        // 정적 파일 핸들러 만들기. www 아래 파일을 그대로 내려준다.
+        StaticFileHandler staticHandler = new StaticFileHandler(ServerConfig.WEB_ROOT);
+        // POST 요청 기본 동작은 여기로 보낸다. 필요하면 다른 경로로 덮어쓴다.
+        SimplePostHandler defaultPostHandler = new SimplePostHandler();
+        // 로그인, 회원가입, 로그아웃을 처리하는 핸들러
+        AuthHandler authHandler = new AuthHandler();
+        // 게시판 저장/삭제 담당 서비스
+        PostService postService = new PostService();
         PostCreationHandler postCreationHandler = new PostCreationHandler(postService);
         PostDeleteHandler postDeleteHandler = new PostDeleteHandler(postService);
         PostListHandler postListHandler = new PostListHandler(postService);
 
+        // POST 라우팅 테이블. 기본 핸들러에 없는 경로는 여기서 덮어쓴다.
         RoutedPostHandler routedPostHandler = new RoutedPostHandler(defaultPostHandler);
         routedPostHandler.register("/login", authHandler);
         routedPostHandler.register("/register", authHandler);
@@ -51,7 +52,9 @@ public final class ServerMain {
         routedPostHandler.register("/posts/delete", postDeleteHandler);
         routedPostHandler.register("/posts/list", postListHandler);
 
+        // 최종 라우터. GET/HEAD는 정적 파일, POST는 위에서 만든 테이블로 간다.
         Router router = new Router(staticHandler, routedPostHandler);
+        // 요청이 들어올 때마다 순서대로 돌릴 필터 목록
         List<Filter> filters = List.of(
                 new LoggingFilter(),
                 new ExceptionMappingFilter("/"),
@@ -65,9 +68,9 @@ public final class ServerMain {
                 new PathTraversalFilter(ServerConfig.WEB_ROOT, "/"),
                 new HeadFilter()
         );
-        // NetAcceptor가 실질적으로 소켓 수락과 워커 스케줄링을 담당한다.
+        // NetAcceptor가 실질적으로 소켓 열고 워커 스레드 돌린다.
         NetAcceptor acceptor = new NetAcceptor(router, filters);
-        // JVM 종료 시점에도 서버가 깔끔히 내려가도록 훅을 등록한다.
+        // 프로그램이 꺼질 때 정리 작업 하도록 훅 추가
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 acceptor.stop();
@@ -82,9 +85,7 @@ public final class ServerMain {
         }
     }
 
-    /**
-     * www 디렉터리가 없으면 생성하고, 기본 index.html 이 없을 경우 생성한다.
-     */
+    // www 폴더가 없으면 만들어주고, 기본 index.html 도 같이 만들어준다.
     private static void ensureWebRoot() {
         try {
             Files.createDirectories(ServerConfig.WEB_ROOT);
